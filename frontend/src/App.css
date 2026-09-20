@@ -143,6 +143,7 @@ h1 { margin: 0; overflow-wrap: anywhere; color: var(--text); font-family: 'Playf
 @media (max-width: 720px) {
   .chat-rail { position: fixed; z-index: 4; height: 100%; box-shadow: var(--shadow); }
   .chat-rail.collapsed { width: 260px; flex-basis: 260px; padding: 13px 10px; transform: translateX(-100%); }
+  .rail-backdrop { position: fixed; z-index: 3; inset: 0; border: 0; background: rgba(0,0,0,.38); }
   .topbar { padding: 0 13px; }.crumb { max-width: 42%; }.user-name { display: none; }
   .content-wrap { width: calc(100% - 26px); padding-top: 28px; }.content-header { align-items: flex-start; }
   .doc-badge { margin-top: 4px; }.message.user { max-width: 94%; }.workspace-footer { width: calc(100% - 26px); flex-direction: column; align-items: center; gap: 5px; }

@@ -47,7 +47,7 @@ function App() {
   const [isSending, setIsSending] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState('')
-  const [isRailOpen, setIsRailOpen] = useState(true)
+  const [isRailOpen, setIsRailOpen] = useState(() => window.matchMedia('(min-width: 721px)').matches)
   const [theme, setTheme] = useState(() => localStorage.getItem('index-ask-theme') || 'light')
   const [pendingQuestion, setPendingQuestion] = useState(null)
   const fileInputRef = useRef(null)
@@ -111,6 +111,7 @@ function App() {
       const chat = await apiRequest(`/chats/${chatId}`)
       setActiveChat(chat)
       setPendingQuestion(null)
+      if (window.innerWidth <= 720) setIsRailOpen(false)
       setError('')
     } catch (requestError) {
       setError(requestError.message)
@@ -124,6 +125,7 @@ function App() {
       setChats((current) => [chat, ...current.filter((item) => item.id !== chat.id)])
       setActiveChat(chat)
       setPendingQuestion(null)
+      if (window.innerWidth <= 720) setIsRailOpen(false)
       setError('')
     } catch (requestError) {
       setError(requestError.message)
@@ -232,6 +234,7 @@ function App() {
         </div>
         <div className="rail-footer"><span className="status-dot" /> Local workspace</div>
       </aside>
+      {isRailOpen && <button className="rail-backdrop" type="button" aria-label="Close sidebar" onClick={() => setIsRailOpen(false)} />}
 
       <section className="workspace">
         <header className="topbar">
