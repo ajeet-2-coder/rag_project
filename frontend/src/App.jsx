@@ -7,7 +7,6 @@ import {
   LoaderCircle,
   MessageSquareText,
   Moon,
-  MoreHorizontal,
   PanelLeft,
   Plus,
   RefreshCw,
@@ -50,6 +49,7 @@ function App() {
   const [isRailOpen, setIsRailOpen] = useState(() => window.matchMedia('(min-width: 721px)').matches)
   const [theme, setTheme] = useState(() => localStorage.getItem('index-ask-theme') || 'light')
   const [pendingQuestion, setPendingQuestion] = useState(null)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const fileInputRef = useRef(null)
   const messagesEndRef = useRef(null)
 
@@ -240,7 +240,7 @@ function App() {
         <header className="topbar">
           <button className="icon-button" type="button" aria-label="Toggle sidebar" onClick={() => setIsRailOpen((open) => !open)}><PanelLeft size={18} /></button>
           <div className="crumb"><span>Workspace</span><span>/</span><strong>{activeChat?.title || 'New conversation'}</strong></div>
-          <div className="account-actions"><span className="user-name">{user.name}</span><button className="theme-button" type="button" aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`} onClick={() => setTheme((current) => current === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}</button><button className="logout-button" type="button" onClick={logout}>Log out</button><button className="icon-button" type="button" aria-label="More options"><MoreHorizontal size={19} /></button></div>
+          <div className="account-actions"><span className="user-name">{user.name}</span><button className="theme-button" type="button" aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`} onClick={() => setTheme((current) => current === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}</button><button className="logout-button" type="button" onClick={() => setShowLogoutConfirm(true)}>Log out</button></div>
         </header>
 
         {error && <div className="error-banner"><X size={16} /><span>{error}</span><button type="button" onClick={() => setError('')} aria-label="Dismiss error"><X size={15} /></button></div>}
@@ -277,6 +277,7 @@ function App() {
         </div>
         <footer className="workspace-footer"><span><span className="status-dot" /> Powered by your private document index</span><span><Search size={13} /> Answers are generated from retrieved passages</span></footer>
       </section>
+      {showLogoutConfirm && <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowLogoutConfirm(false)}><section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="logout-title" onMouseDown={(event) => event.stopPropagation()}><h2 id="logout-title">Log out?</h2><p>Your current session will be closed on this device.</p><div className="confirm-actions"><button className="cancel-button" type="button" onClick={() => setShowLogoutConfirm(false)}>Cancel</button><button className="confirm-logout" type="button" onClick={() => { setShowLogoutConfirm(false); logout() }}>Log out</button></div></section></div>}
       {isLoading && <div className="loading-screen"><LoaderCircle className="spin" size={24} /><span>Opening your workspace...</span></div>}
     </main>
   )
