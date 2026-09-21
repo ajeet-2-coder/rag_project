@@ -20,7 +20,7 @@ export async function generateAnswer(question, context) {
     }
 
     if (!context || !context.trim()) {
-        return "I could not find any relevant information in the uploaded document to answer this question.";
+        return "I could not find enough relevant text in the uploaded document to answer that question. Try asking about a specific section or re-uploading a text-based PDF.";
     }
 
     const isOverviewQuestion = /\b(what is|what's|about|overview|summari[sz]e|summary|main idea|key point|purpose|topic|subject|conclusion|conclusions)\b/i.test(question);

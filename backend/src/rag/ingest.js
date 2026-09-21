@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { Pinecone } from "@pinecone-database/pinecone";
+import { generateBatchEmbeddings } from "../services/embeddingService.js";
 
 dotenv.config();
 
@@ -32,25 +32,18 @@ export async function indexDocument(
         chunkOverlap: 200,
     });
 
-    const chunkedDocs =
-        await textSplitter.splitDocuments(rawDocs);
+    const chunkedDocs = (await textSplitter.splitDocuments(rawDocs))
+        .filter((doc) => doc.pageContent && doc.pageContent.trim());
+
+    if (chunkedDocs.length === 0) {
+        throw new Error("The PDF does not contain extractable text.");
+    }
 
     console.log("Chunks:", chunkedDocs.length);
 
 
     // ==========================================
-    // 3. GEMINI EMBEDDINGS
-    // ==========================================
-
-    const embeddings = new GoogleGenerativeAIEmbeddings({
-        apiKey: process.env.GEMINI_API_KEY,
-        model: "gemini-embedding-001",
-        outputDimensionality: 1024,
-    });
-
-
-    // ==========================================
-    // 4. CONNECT TO PINECONE
+    // 3. CONNECT TO PINECONE
     // ==========================================
 
     const pinecone = new Pinecone({
@@ -63,8 +56,20 @@ export async function indexDocument(
 
 
     // ==========================================
-    // 5. EMBED + STORE EACH CHUNK
+    // 4. EMBED + STORE EACH CHUNK
     // ==========================================
+
+    const vectors = [];
+    const embeddingBatchSize = 32;
+    for (let start = 0; start < chunkedDocs.length; start += embeddingBatchSize) {
+        const batch = chunkedDocs.slice(start, start + embeddingBatchSize);
+        vectors.push(...await generateBatchEmbeddings(batch.map((doc) => doc.pageContent)));
+    }
+
+    if (vectors.length !== chunkedDocs.length || vectors.some((vector) => vector.length !== 1024)) {
+        const dimensions = vectors.map((vector) => vector.length);
+        throw new Error(`Embedding generation failed: expected ${chunkedDocs.length} vectors of dimension 1024, received ${vectors.length} vectors with dimensions [${dimensions.join(", ")}].`);
+    }
 
     for (let i = 0; i < chunkedDocs.length; i++) {
 
@@ -75,13 +80,7 @@ export async function indexDocument(
         );
 
 
-        // Generate embedding
-        const vector =
-            await embeddings.embedDocuments([
-                doc.pageContent
-            ]);
-
-        const values = vector[0];
+        const values = vectors[i];
 
 
         console.log(

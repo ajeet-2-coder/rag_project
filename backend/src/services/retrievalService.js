@@ -67,6 +67,10 @@ export async function retrieveContext(question, chatId, topK = 5) {
         .map((src, i) => `[Chunk ${i + 1} | File: ${src.fileName} | Page: ${src.page}]:\n${src.text}`)
         .join("\n\n---\n\n");
 
+    if (!context.trim()) {
+        console.warn(`[RAG Retrieval] No matching document chunks found for chat "${chatId}".`);
+    }
+
     return {
         context,
         sources,
