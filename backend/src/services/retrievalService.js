@@ -9,7 +9,7 @@ import { generateEmbedding } from "./embeddingService.js";
  * @param {number} topK - Number of top similar chunks to retrieve (default: 5)
  * @returns {Promise<{ context: string, sources: Array<{ fileName: string, page: number, text: string, score: number }> }>}
  */
-export async function retrieveContext(question, chatId, topK = 5) {
+export async function retrieveContext(question, chatId, topK = 5, documentPages = null) {
     if (!question || !question.trim()) {
         throw new Error("Question cannot be empty for retrieval.");
     }
@@ -57,7 +57,7 @@ export async function retrieveContext(question, chatId, topK = 5) {
         .filter((match) => match.metadata && match.metadata.text)
         .map((match) => ({
             fileName: match.metadata.fileName || "document.pdf",
-            page: match.metadata.page || 1,
+            page: documentPages ? Math.min(Math.max(Number(match.metadata.page) || 1, 1), documentPages) : (match.metadata.page || 1),
             text: match.metadata.text,
             score: match.score || 0,
         }));

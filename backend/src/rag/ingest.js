@@ -54,6 +54,14 @@ export async function indexDocument(
         process.env.PINECONE_INDEX_NAME
     );
 
+    // A failed or repeated upload can leave old vectors under this chat ID.
+    // Remove them before indexing so retrieval cannot mix different PDFs.
+    await pineconeIndex.deleteMany({
+        chatId: {
+            $eq: chatId,
+        },
+    });
+
 
     // ==========================================
     // 4. EMBED + STORE EACH CHUNK

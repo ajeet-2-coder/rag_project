@@ -87,7 +87,7 @@ export async function askQuestion(req, res) {
         chat.messages.push(userMsg);
 
         // 2. Query RAG pipeline
-        const result = await queryRAG(question.trim(), chatId);
+        const result = await queryRAG(question.trim(), chatId, chat.document.pages);
 
         // 3. Add AI message
         const assistantMsg = {

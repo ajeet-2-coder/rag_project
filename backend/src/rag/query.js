@@ -15,7 +15,7 @@ import { generateAnswer } from "../services/llmService.js";
  * @param {string} chatId - Isolated chat ID
  * @returns {Promise<{ answer: string, sources: Array<{ fileName: string, page: number, text: string }> }>}
  */
-export async function queryRAG(question, chatId) {
+export async function queryRAG(question, chatId, documentPages = null) {
     if (!question || !question.trim()) {
         throw new Error("Question cannot be empty.");
     }
@@ -26,7 +26,7 @@ export async function queryRAG(question, chatId) {
     console.log(`[RAG Query] Searching for context in chat "${chatId}" for query: "${question}"`);
 
     // 1. Retrieve top matching chunks
-    const { context, sources } = await retrieveContext(question, chatId, 5);
+    const { context, sources } = await retrieveContext(question, chatId, 5, documentPages);
 
     console.log(`[RAG Query] Retrieved ${sources.length} matching chunks from Pinecone.`);
 
